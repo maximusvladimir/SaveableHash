@@ -1,7 +1,7 @@
 SaveableHash
 ============
 
-A little Java library that lets you save HashMaps to a file, stream, etc.
+A little Java library that lets you save HashMaps to a file, etc.
 
 
 How to Use
@@ -36,7 +36,7 @@ java.lang.Long:overhead:4929491905283
 ...
 ```
 
-To read the HashMap you would need to use ```HashIO.read()```.
+To read the HashMap you would need to use ```HashIO.load()```.
 
 ```Java
 FileReader fr = new FileReader(new File("timeframes.txt"));
