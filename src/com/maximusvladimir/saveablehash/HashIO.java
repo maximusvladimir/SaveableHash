@@ -38,11 +38,18 @@ public class HashIO {
 
 		String line = null;
 		long lineNum = 0;
+		boolean compressed = false;
 		try {
 			while ((line = reader.readLine()) != null) {
 				lineNum++;
-				if (!line.equals("com.maximusvladimir.saveablehash")) {
-					line = Compressor.decompress(line);
+				if (line.startsWith("com.maximusvladimir.saveablehash:")) {
+					String header = line.replace("com.maximusvladimir.saveablehash:", "");
+					if (header.equals("compressed"))
+						compressed = true;
+				}
+				else {
+					if (compressed)
+						line = Compressor.decompress(line);
 					String[] parts = line.split(":");
 					if (parts.length < 2)
 						throw new RuntimeException(
@@ -71,7 +78,7 @@ public class HashIO {
 	}
 
 	/**
-	 * Saves a HashMap to a BufferedWriter.
+	 * Saves (and compresses) a HashMap to a BufferedWriter.
 	 * 
 	 * @param factory
 	 *            The factory to use to save the data.
@@ -82,19 +89,41 @@ public class HashIO {
 	 */
 	public static void save(ParseFactory factory, HashMap<String, ?> set,
 			BufferedWriter writer) {
+		save(factory, set, writer, true);
+	}
+
+	/**
+	 * Saves a HashMap to a BufferedWriter.
+	 * 
+	 * @param factory
+	 *            The factory to use to save the data.
+	 * @param set
+	 *            The HashMap to load the data from.
+	 * @param writer
+	 *            The BufferedWriter to write the data to.
+	 * @param compress
+	 *            Should the hashmap be compressed?
+	 */
+	public static void save(ParseFactory factory, HashMap<String, ?> set,
+			BufferedWriter writer, boolean compress) {
 		if (writer == null)
 			throw new IllegalArgumentException("Invalid buffered writer.");
 
 		try {
 			String end = System.lineSeparator();
-			writer.write("com.maximusvladimir.saveablehash" + end);
+			String compr = "compressed";
+			if (!compress)
+				compr = "un" + compr;
+			writer.write("com.maximusvladimir.saveablehash:" + compr + end);
 
 			String[] strs = new String[set.size()];
 			strs = set.keySet().toArray(strs);
 			for (int i = 0; i < strs.length; i++) {
 				String data = factory.putType(set, strs[i]);
-				writer.write(Compressor.compress(data) + end);
-				//writer.write(data + end);
+				if (compress)
+					writer.write(Compressor.compress(data) + end);
+				else
+					writer.write(data + end);
 			}
 		} catch (IOException t) {
 			throw new RuntimeException(

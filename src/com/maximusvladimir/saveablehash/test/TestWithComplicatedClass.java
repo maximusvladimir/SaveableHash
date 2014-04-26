@@ -44,7 +44,7 @@ public class TestWithComplicatedClass {
 		try {
 			FileWriter fr = new FileWriter(file);
 			BufferedWriter writer = new BufferedWriter(fr);
-			HashIO.save(factory, trianglesAreEverywhere, writer);
+			HashIO.save(factory, trianglesAreEverywhere, writer, false); // false = do not compress.
 			writer.flush();
 			writer.close();
 			fr.close();
