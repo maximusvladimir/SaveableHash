@@ -11,7 +11,7 @@ public class Base64 {
 	private final static char[] ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
 			.toCharArray();
 
-	private static int[] toInt = new int[128];
+	private static int[] toInt = new int[2*ALPHABET.length];
 
 	static {
 		for (int i = 0; i < ALPHABET.length; i++) {
@@ -19,8 +19,8 @@ public class Base64 {
 		}
 	}
 
-	public static String encode(String data) {
-		byte[] buf = data.getBytes();
+	public static String encodeByte(byte[] data) {
+		byte[] buf = data;
 		int size = buf.length;
 		char[] ar = new char[((size + 2) / 3) * 4];
 		int a = 0;
@@ -45,7 +45,15 @@ public class Base64 {
 		return new String(ar);
 	}
 
+	public static String encode(String s) {
+		return encodeByte(s.getBytes());
+	}
+	
 	public static String decode(String s) {
+		return new String(decodeByte(s));
+	}
+	
+	public static byte[] decodeByte(String s) {
 		int delta = s.endsWith("==") ? 2 : s.endsWith("=") ? 1 : 0;
 		byte[] buffer = new byte[s.length() * 3 / 4 - delta];
 		int mask = 0xFF;
@@ -55,17 +63,17 @@ public class Base64 {
 			int c1 = toInt[s.charAt(i + 1)];
 			buffer[index++] = (byte) (((c0 << 2) | (c1 >> 4)) & mask);
 			if (index >= buffer.length) {
-				return new String(buffer);
+				return buffer;
 			}
 			int c2 = toInt[s.charAt(i + 2)];
 			buffer[index++] = (byte) (((c1 << 4) | (c2 >> 2)) & mask);
 			if (index >= buffer.length) {
-				return new String(buffer);
+				return buffer;
 			}
 			int c3 = toInt[s.charAt(i + 3)];
 			buffer[index++] = (byte) (((c2 << 6) | c3) & mask);
 		}
-		return new String(buffer);
+		return buffer;
 	}
 
 }
